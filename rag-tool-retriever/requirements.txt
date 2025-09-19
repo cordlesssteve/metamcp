@@ -1,0 +1,41 @@
+# RAG-based Tool Retriever for MetaMCP
+# Core dependencies for the RAG system
+
+# LangChain framework for tool orchestration and embeddings
+langchain>=0.1.0
+
+# ChromaDB for vector storage and similarity search
+chromadb>=0.4.0
+
+# Sentence transformers for local embedding generation
+sentence-transformers>=2.2.0
+
+# HuggingFace Hub for accessing the nomic-embed-text-v1.5 model
+huggingface-hub>=0.16.0
+
+# Core scientific computing libraries
+numpy>=1.24.0
+pandas>=2.0.0
+
+# Data validation and serialization
+pydantic>=2.0.0
+
+# Optional: PyTorch for better embedding performance
+# Uncomment if you want to use GPU acceleration
+# torch>=2.0.0
+# torchvision>=0.15.0
+# torchaudio>=2.0.0
+
+# Development and testing dependencies
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+black>=23.0.0
+isort>=5.0.0
+flake8>=6.0.0
+
+# Logging and monitoring
+structlog>=23.0.0
+
+# File handling and utilities
+pathlib2>=2.3.0
+click>=8.0.0
