@@ -1,0 +1,1401 @@
+[
+  {
+    "name": "convert_pdf",
+    "description": "Convert PDF files to Markdown format using marker (recommended) or pymupdf4llm. Marker provides superior quality for complex documents with tables and structured content, with automatic cleaning of formatting artifacts. Returns detailed conversion statistics including processing time and content metrics.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "pdf_path": {
+          "type": "string",
+          "description": "Absolute path to the PDF file to convert"
+        },
+        "output_path": {
+          "type": "string",
+          "description": "Optional path to write markdown output. If not provided, returns content directly"
+        },
+        "options": {
+          "type": "object",
+          "properties": {
+            "engine": {
+              "type": "string",
+              "enum": [
+                "pymupdf4llm",
+                "marker"
+              ],
+              "default": "marker",
+              "description": "PDF conversion engine (marker recommended for complex documents)"
+            },
+            "page_chunks": {
+              "type": "boolean",
+              "default": false,
+              "description": "Process as individual pages for memory efficiency (pymupdf4llm only)"
+            },
+            "write_images": {
+              "type": "boolean",
+              "default": false,
+              "description": "Extract embedded images to files"
+            },
+            "image_path": {
+              "type": "string",
+              "description": "Directory for extracted images (requires write_images: true)"
+            },
+            "table_strategy": {
+              "type": "string",
+              "enum": [
+                "fast",
+                "accurate"
+              ],
+              "default": "accurate",
+              "description": "Table extraction strategy (pymupdf4llm only)"
+            },
+            "extract_content": {
+              "type": "string",
+              "enum": [
+                "text",
+                "figures",
+                "both"
+              ],
+              "default": "both",
+              "description": "Content to extract from PDF (pymupdf4llm only)"
+            },
+            "auto_clean": {
+              "type": "boolean",
+              "default": true,
+              "description": "Automatically clean marker formatting artifacts"
+            }
+          },
+          "additionalProperties": false,
+          "default": {}
+        }
+      },
+      "required": [
+        "pdf_path"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "document-organizer",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "check_dependency",
+    "description": "Check if pymupdf4llm is available and optionally install it if missing. Returns version information and availability status. Use this before attempting PDF conversions.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "install_if_missing": {
+          "type": "boolean",
+          "default": false,
+          "description": "Attempt to install pymupdf4llm if not found"
+        }
+      },
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "document-organizer",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "document_organizer__discover_pdfs",
+    "description": "\ud83d\udd0d PDF FILE DISCOVERY - Recursively scan directory trees to locate all PDF files. Returns complete inventory with file paths, directory structure analysis, and scan statistics. Supports both recursive deep scanning and single-level directory inspection for comprehensive document discovery.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "directory_path": {
+          "type": "string",
+          "description": "Path to directory to scan for PDF files"
+        },
+        "recursive": {
+          "type": "boolean",
+          "default": true,
+          "description": "Search subdirectories recursively"
+        }
+      },
+      "required": [
+        "directory_path"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "document-organizer",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "document_organizer__check_conversions",
+    "description": "\u2705 CONVERSION STATUS AUDIT - Analyze PDF collection to determine which files already have companion Markdown files. Returns detailed conversion status matrix showing converted vs. unconverted documents, enabling targeted conversion workflows and avoiding duplicate processing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "directory_path": {
+          "type": "string",
+          "description": "Path to directory containing PDF files"
+        },
+        "pdf_files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Specific PDF files to check (if not provided, discovers all)"
+        }
+      },
+      "required": [
+        "directory_path"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "document-organizer",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "document_organizer__convert_missing",
+    "description": "\ud83d\udd04 SELECTIVE PDF CONVERSION - Convert only PDFs that lack companion Markdown files using pymupdf4llm. Intelligently skips already-converted documents and provides detailed conversion reports with success/failure counts, processing statistics, and error diagnostics. Memory-efficient processing for large document collections.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "directory_path": {
+          "type": "string",
+          "description": "Path to directory containing PDFs to convert"
+        },
+        "pdf_files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Specific PDF files to convert (if not provided, converts all missing)"
+        }
+      },
+      "required": [
+        "directory_path"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "document-organizer",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "document_organizer__analyze_content",
+    "description": "\ud83d\udcca INTELLIGENT DOCUMENT CATEGORIZATION - Analyze markdown files to automatically determine document categories using keyword-based content analysis. Scans document content and classifies into categories: Research, Planning, Documentation, Technical, Business, or General. Returns category assignments with confidence scores and detected keywords for organizational decision making.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "directory_path": {
+          "type": "string",
+          "description": "Path to directory containing markdown files"
+        },
+        "md_files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Specific MD files to analyze (if not provided, analyzes all)"
+        }
+      },
+      "required": [
+        "directory_path"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "document-organizer",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "document_organizer__organize_structure",
+    "description": "\ud83c\udfd7\ufe0f AUTOMATED FOLDER ORGANIZATION - Create hierarchical directory structure based on document categories and automatically move files to appropriate locations. Creates category-specific folders with optional PDF/MD subfolders, then relocates documents based on provided category mappings. Supports both flat and nested organization patterns for efficient document management.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "directory_path": {
+          "type": "string",
+          "description": "Path to directory to organize"
+        },
+        "categories": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": "Categories with their associated file patterns/names"
+        },
+        "create_pdf_md_subfolders": {
+          "type": "boolean",
+          "default": true,
+          "description": "Create PDFs and MDs subfolders in each category"
+        }
+      },
+      "required": [
+        "directory_path",
+        "categories"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "document-organizer",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "document_organizer__full_workflow",
+    "description": "\ud83d\udd04 COMPLETE DOCUMENT AUTOMATION - Execute end-to-end document organization pipeline: (1) Discover all PDFs recursively, (2) Check conversion status, (3) Convert missing PDFs to Markdown, (4) Analyze content for categorization, (5) Create organized folder structure. Returns detailed workflow progress with success/failure counts, processing statistics, and final organization summary. One-command solution for complete document management.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "directory_path": {
+          "type": "string",
+          "description": "Path to directory to organize completely"
+        },
+        "analyze_content": {
+          "type": "boolean",
+          "default": true,
+          "description": "Analyze content for categorization"
+        }
+      },
+      "required": [
+        "directory_path"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "document-organizer",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "document_organizer__init_project_docs",
+    "description": "\ud83d\udccb INITIALIZE PROJECT DOCUMENTATION - Create Universal Project Documentation Standard structure with required files (CURRENT_STATUS.md, ACTIVE_PLAN.md, .claude-instructions.md) and directory structure. Generates templates customized for the specific project type and creates docs/plans/archived, docs/progress directories for proper documentation management.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "directory_path": {
+          "type": "string",
+          "description": "Path to project directory to initialize with documentation standard"
+        },
+        "project_name": {
+          "type": "string",
+          "description": "Name of the project for templates"
+        },
+        "project_type": {
+          "type": "string",
+          "description": "Type of project (e.g., 'web-app', 'api', 'library')"
+        }
+      },
+      "required": [
+        "directory_path",
+        "project_name"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "document-organizer",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "document_organizer__archive_plan",
+    "description": "\ud83d\udcc2 ARCHIVE DEVELOPMENT PLAN - Move a plan file to archived or superseded status with proper status header updates and archival tracking. Updates plan status, adds archival metadata, moves to appropriate docs/plans directory, and maintains complete audit trail of plan evolution.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "plan_path": {
+          "type": "string",
+          "description": "Path to the plan file to archive"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Reason for archiving this plan"
+        },
+        "new_status": {
+          "type": "string",
+          "enum": [
+            "ARCHIVED",
+            "SUPERSEDED"
+          ],
+          "default": "ARCHIVED",
+          "description": "Status to set when archiving"
+        }
+      },
+      "required": [
+        "plan_path",
+        "reason"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "document-organizer",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "document_organizer__validate_doc_structure",
+    "description": "\u2705 VALIDATE DOCUMENTATION STRUCTURE - Check project for compliance with Universal Project Documentation Standard. Verifies required files exist, validates status headers, detects multiple ACTIVE plans, and provides detailed compliance report with suggestions for fixing issues.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "directory_path": {
+          "type": "string",
+          "description": "Path to project directory to validate"
+        }
+      },
+      "required": [
+        "directory_path"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "document-organizer",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "document_organizer__create_weekly_handoff",
+    "description": "\ud83d\udcc5 CREATE WEEKLY HANDOFF - Generate weekly progress report and update project status for session handoffs. Creates dated progress entries in docs/progress/YYYY-MM/ with completed items, key decisions, and next week priorities following the Universal Project Documentation Standard protocol.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "project_path": {
+          "type": "string",
+          "description": "Path to project directory"
+        },
+        "completed_items": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Items completed this week"
+        },
+        "key_decisions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Key decisions made this week"
+        }
+      },
+      "required": [
+        "project_path"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "document-organizer",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "get_current_session_usage",
+    "description": "Get usage metrics for the current Claude Code session (tokens, cost, activity)",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    },
+    "server": "claude-telemetry",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "get_today_usage",
+    "description": "Get total usage metrics for today (tokens, cost, sessions, activity)",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    },
+    "server": "claude-telemetry",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "get_week_usage",
+    "description": "Get total usage metrics for the current week (Monday-Sunday)",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    },
+    "server": "claude-telemetry",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "get_usage_summary",
+    "description": "Get comprehensive usage summary for session, today, and this week in one call",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    },
+    "server": "claude-telemetry",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "check_usage_limits",
+    "description": "Check current usage against specified limits and get warnings",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "daily_token_limit": {
+          "type": "number",
+          "description": "Daily token limit to check against"
+        },
+        "weekly_token_limit": {
+          "type": "number",
+          "description": "Weekly token limit to check against"
+        },
+        "session_token_limit": {
+          "type": "number",
+          "description": "Session token limit to check against"
+        },
+        "daily_cost_limit": {
+          "type": "number",
+          "description": "Daily cost limit in USD to check against"
+        },
+        "weekly_cost_limit": {
+          "type": "number",
+          "description": "Weekly cost limit in USD to check against"
+        },
+        "session_cost_limit": {
+          "type": "number",
+          "description": "Session cost limit in USD to check against"
+        }
+      }
+    },
+    "server": "claude-telemetry",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "get_usage_warnings",
+    "description": "Get usage warnings with default thresholds (80% and 90% of typical limits)",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    },
+    "server": "claude-telemetry",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "estimate_remaining_capacity",
+    "description": "Estimate remaining usage capacity for specified daily/weekly limits",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "daily_token_limit": {
+          "type": "number",
+          "description": "Daily token limit for capacity estimation"
+        },
+        "weekly_token_limit": {
+          "type": "number",
+          "description": "Weekly token limit for capacity estimation"
+        }
+      },
+      "required": []
+    },
+    "server": "claude-telemetry",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "get_usage_trends",
+    "description": "Get usage trends over time to identify patterns",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "days_back": {
+          "type": "number",
+          "description": "Number of days to look back (default: 7)",
+          "default": 7
+        }
+      }
+    },
+    "server": "claude-telemetry",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "get_session_analytics",
+    "description": "Get analytics about session patterns (averages, totals, productivity metrics)",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    },
+    "server": "claude-telemetry",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "get_tool_usage_breakdown",
+    "description": "Get breakdown of tool usage and edit decisions",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    },
+    "server": "claude-telemetry",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "compare_usage_periods",
+    "description": "Compare usage between different time periods",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "period1_days": {
+          "type": "number",
+          "description": "Days back for first period (default: 7)",
+          "default": 7
+        },
+        "period2_days": {
+          "type": "number",
+          "description": "Days back for second period (default: 14)",
+          "default": 14
+        }
+      }
+    },
+    "server": "claude-telemetry",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "get_telemetry_health",
+    "description": "Check if telemetry system is running and accessible",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    },
+    "server": "claude-telemetry",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "extract_session_context",
+    "description": "Extract current session context for Claude Code session handoff. Gathers working directory, project type, recent files, git changes, and any intelligent context provided via provide_intelligent_context. Usually called automatically by perform_handoff.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    },
+    "server": "mitosis",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "generate_handoff_brief",
+    "description": "Generates handoff briefing documents (.claude-handoff.json and .claude-handoff.md) from session context. Creates both machine-readable and human-readable formats. Enhanced with intelligent context if provide_intelligent_context was called. Usually used automatically by perform_handoff.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "context": {
+          "type": "object",
+          "description": "Session context object containing current state information",
+          "properties": {
+            "currentDirectory": {
+              "type": "string"
+            },
+            "projectType": {
+              "type": "string"
+            },
+            "activeFiles": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "recentChanges": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "keyDecisions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "currentTasks": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "workingSummary": {
+              "type": "string"
+            },
+            "timestamp": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "currentDirectory",
+            "timestamp"
+          ]
+        }
+      },
+      "required": [
+        "context"
+      ]
+    },
+    "server": "mitosis",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "spawn_claude_session",
+    "description": "Spawns a new Claude Code session in Windows Terminal with automatic Claude startup. Creates handoff files if briefing provided. The new session displays context summary on startup. Usually called by perform_handoff, but can be used independently.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "directory": {
+          "type": "string",
+          "description": "Target directory for the new Claude session (defaults to current directory)"
+        },
+        "briefing": {
+          "type": "object",
+          "description": "Optional handoff briefing to provide context to the new session",
+          "properties": {
+            "sessionId": {
+              "type": "string"
+            },
+            "projectSummary": {
+              "type": "string"
+            },
+            "currentContext": {
+              "type": "string"
+            },
+            "activeWork": {
+              "type": "string"
+            },
+            "nextSteps": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "importantFiles": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "codeChanges": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "decisions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "timestamp": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": []
+    },
+    "server": "mitosis",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "perform_handoff",
+    "description": "MAIN TOOL: Performs complete Claude Code session handoff workflow. Extracts current context, generates handoff files, and spawns new Windows Terminal tab with Claude automatically started. The new session will see a context summary on startup. For enhanced handoff with conversation details, call provide_intelligent_context first. This is the primary tool for session transitions.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    },
+    "server": "mitosis",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "provide_intelligent_context",
+    "description": "ENHANCED HANDOFF: Provides rich conversation context for intelligent session handoff. Call this BEFORE perform_handoff to include detailed conversation summary, progress, challenges, and decisions in the new session. This enables near-seamless conversation continuation. Without this, handoff includes only basic file/git context.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "conversationSummary": {
+          "type": "string",
+          "description": "A comprehensive summary of what's been happening in this conversation"
+        },
+        "currentObjective": {
+          "type": "string",
+          "description": "The main goal or task currently being worked on"
+        },
+        "recentProgress": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Recent accomplishments, completions, or progress made"
+        },
+        "technicalDetails": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Important technical information, configurations, or implementation details"
+        },
+        "challengesEncountered": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Problems, bugs, or obstacles that have been encountered"
+        },
+        "solutionsExplored": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Approaches, solutions, or strategies that have been tried or discussed"
+        },
+        "nextSteps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Specific next actions or tasks that should be taken"
+        },
+        "importantDecisions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Key decisions that have been made during the conversation"
+        },
+        "codeChangesExplained": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Explanations of what code changes were made and why"
+        },
+        "contextualNotes": {
+          "type": "string",
+          "description": "Any additional context, background, or important notes for continuation"
+        }
+      },
+      "required": [
+        "conversationSummary",
+        "currentObjective"
+      ]
+    },
+    "server": "mitosis",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "getComponentList",
+    "description": "Get a list of all components from the configured Storybook",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    },
+    "server": "storybook",
+    "server_type": "shell_script"
+  },
+  {
+    "name": "getComponentsProps",
+    "description": "Get props information for multiple components",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "componentNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Array of component names to get props information for"
+        }
+      },
+      "required": [
+        "componentNames"
+      ]
+    },
+    "server": "storybook",
+    "server_type": "shell_script"
+  },
+  {
+    "name": "read_file",
+    "description": "Read the complete contents of a file as text. DEPRECATED: Use read_text_file instead.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "tail": {
+          "type": "number",
+          "description": "If provided, returns only the last N lines of the file"
+        },
+        "head": {
+          "type": "number",
+          "description": "If provided, returns only the first N lines of the file"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "filesystem",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "read_text_file",
+    "description": "Read the complete contents of a file from the file system as text. Handles various text encodings and provides detailed error messages if the file cannot be read. Use this tool when you need to examine the contents of a single file. Use the 'head' parameter to read only the first N lines of a file, or the 'tail' parameter to read only the last N lines of a file. Operates on the file as text regardless of extension. Only works within allowed directories.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "tail": {
+          "type": "number",
+          "description": "If provided, returns only the last N lines of the file"
+        },
+        "head": {
+          "type": "number",
+          "description": "If provided, returns only the first N lines of the file"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "filesystem",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "read_media_file",
+    "description": "Read an image or audio file. Returns the base64 encoded data and MIME type. Only works within allowed directories.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "filesystem",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "read_multiple_files",
+    "description": "Read the contents of multiple files simultaneously. This is more efficient than reading files one by one when you need to analyze or compare multiple files. Each file's content is returned with its path as a reference. Failed reads for individual files won't stop the entire operation. Only works within allowed directories.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "paths"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "filesystem",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "write_file",
+    "description": "Create a new file or completely overwrite an existing file with new content. Use with caution as it will overwrite existing files without warning. Handles text content with proper encoding. Only works within allowed directories.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "content"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "filesystem",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "edit_file",
+    "description": "Make line-based edits to a text file. Each edit replaces exact line sequences with new content. Returns a git-style diff showing the changes made. Only works within allowed directories.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "edits": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "oldText": {
+                "type": "string",
+                "description": "Text to search for - must match exactly"
+              },
+              "newText": {
+                "type": "string",
+                "description": "Text to replace with"
+              }
+            },
+            "required": [
+              "oldText",
+              "newText"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "dryRun": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview changes using git-style diff format"
+        }
+      },
+      "required": [
+        "path",
+        "edits"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "filesystem",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "create_directory",
+    "description": "Create a new directory or ensure a directory exists. Can create multiple nested directories in one operation. If the directory already exists, this operation will succeed silently. Perfect for setting up directory structures for projects or ensuring required paths exist. Only works within allowed directories.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "filesystem",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "list_directory",
+    "description": "Get a detailed listing of all files and directories in a specified path. Results clearly distinguish between files and directories with [FILE] and [DIR] prefixes. This tool is essential for understanding directory structure and finding specific files within a directory. Only works within allowed directories.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "filesystem",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "list_directory_with_sizes",
+    "description": "Get a detailed listing of all files and directories in a specified path, including sizes. Results clearly distinguish between files and directories with [FILE] and [DIR] prefixes. This tool is useful for understanding directory structure and finding specific files within a directory. Only works within allowed directories.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "sortBy": {
+          "type": "string",
+          "enum": [
+            "name",
+            "size"
+          ],
+          "default": "name",
+          "description": "Sort entries by name or size"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "filesystem",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "directory_tree",
+    "description": "Get a recursive tree view of files and directories as a JSON structure. Each entry includes 'name', 'type' (file/directory), and 'children' for directories. Files have no children array, while directories always have a children array (which may be empty). The output is formatted with 2-space indentation for readability. Only works within allowed directories.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "filesystem",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "move_file",
+    "description": "Move or rename files and directories. Can move files between directories and rename them in a single operation. If the destination exists, the operation will fail. Works across different directories and can be used for simple renaming within the same directory. Both source and destination must be within allowed directories.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "destination": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "destination"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "filesystem",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "search_files",
+    "description": "Recursively search for files and directories matching a pattern. Searches through all subdirectories from the starting path. The search is case-insensitive and matches partial names. Returns full paths to all matching items. Great for finding files when you don't know their exact location. Only searches within allowed directories.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "pattern": {
+          "type": "string"
+        },
+        "excludePatterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        }
+      },
+      "required": [
+        "path",
+        "pattern"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "filesystem",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "get_file_info",
+    "description": "Retrieve detailed metadata about a file or directory. Returns comprehensive information including size, creation time, last modified time, permissions, and type. This tool is perfect for understanding file characteristics without reading the actual content. Only works within allowed directories.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "server": "filesystem",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "list_allowed_directories",
+    "description": "Returns the list of root directories that this server is allowed to access. Use this to understand which directories are available before trying to access files. ",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    },
+    "server": "filesystem",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "create_entities",
+    "description": "Create multiple new entities in the knowledge graph",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The name of the entity"
+              },
+              "entityType": {
+                "type": "string",
+                "description": "The type of the entity"
+              },
+              "observations": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "An array of observation contents associated with the entity"
+              }
+            },
+            "required": [
+              "name",
+              "entityType",
+              "observations"
+            ]
+          }
+        }
+      },
+      "required": [
+        "entities"
+      ]
+    },
+    "server": "memory",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "create_relations",
+    "description": "Create multiple new relations between entities in the knowledge graph. Relations should be in active voice",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "relations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "string",
+                "description": "The name of the entity where the relation starts"
+              },
+              "to": {
+                "type": "string",
+                "description": "The name of the entity where the relation ends"
+              },
+              "relationType": {
+                "type": "string",
+                "description": "The type of the relation"
+              }
+            },
+            "required": [
+              "from",
+              "to",
+              "relationType"
+            ]
+          }
+        }
+      },
+      "required": [
+        "relations"
+      ]
+    },
+    "server": "memory",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "add_observations",
+    "description": "Add new observations to existing entities in the knowledge graph",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "observations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "entityName": {
+                "type": "string",
+                "description": "The name of the entity to add the observations to"
+              },
+              "contents": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "An array of observation contents to add"
+              }
+            },
+            "required": [
+              "entityName",
+              "contents"
+            ]
+          }
+        }
+      },
+      "required": [
+        "observations"
+      ]
+    },
+    "server": "memory",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "delete_entities",
+    "description": "Delete multiple entities and their associated relations from the knowledge graph",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "entityNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "An array of entity names to delete"
+        }
+      },
+      "required": [
+        "entityNames"
+      ]
+    },
+    "server": "memory",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "delete_observations",
+    "description": "Delete specific observations from entities in the knowledge graph",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "deletions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "entityName": {
+                "type": "string",
+                "description": "The name of the entity containing the observations"
+              },
+              "observations": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "An array of observations to delete"
+              }
+            },
+            "required": [
+              "entityName",
+              "observations"
+            ]
+          }
+        }
+      },
+      "required": [
+        "deletions"
+      ]
+    },
+    "server": "memory",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "delete_relations",
+    "description": "Delete multiple relations from the knowledge graph",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "relations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "string",
+                "description": "The name of the entity where the relation starts"
+              },
+              "to": {
+                "type": "string",
+                "description": "The name of the entity where the relation ends"
+              },
+              "relationType": {
+                "type": "string",
+                "description": "The type of the relation"
+              }
+            },
+            "required": [
+              "from",
+              "to",
+              "relationType"
+            ]
+          },
+          "description": "An array of relations to delete"
+        }
+      },
+      "required": [
+        "relations"
+      ]
+    },
+    "server": "memory",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "read_graph",
+    "description": "Read the entire knowledge graph",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    },
+    "server": "memory",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "search_nodes",
+    "description": "Search for nodes in the knowledge graph based on a query",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "The search query to match against entity names, types, and observation content"
+        }
+      },
+      "required": [
+        "query"
+      ]
+    },
+    "server": "memory",
+    "server_type": "nodejs"
+  },
+  {
+    "name": "open_nodes",
+    "description": "Open specific nodes in the knowledge graph by their names",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "An array of entity names to retrieve"
+        }
+      },
+      "required": [
+        "names"
+      ]
+    },
+    "server": "memory",
+    "server_type": "nodejs"
+  }
+]
