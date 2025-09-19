@@ -1,20 +1,46 @@
-# Mintlify Starter Kit
+# Documentation
 
-Use the starter kit to get your docs deployed and ready to customize.
+**Status:** MIGRATED TO UNIVERSAL PROJECT DOCUMENTATION STANDARD
+**Last Updated:** 2025-09-19
 
-Click the green **Use this template** button at the top of this repo to copy the Mintlify starter kit. The starter kit contains examples with
+This directory follows the Universal Project Documentation Standard v2.0.
 
-- Guide pages
-- Navigation
-- Customizations
-- API reference pages
-- Use of popular components
+## Current Documentation Structure
 
-**[Follow the full quickstart guide](https://starter.mintlify.com/quickstart)**
+### Status Files (Root Level)
+- `../CURRENT_STATUS.md` - Current project reality and progress
+- `../ACTIVE_PLAN.md` - Currently executing plan
 
-## Development
+### Plans Management
+- `plans/archived/` - Completed plans
+- `plans/superseded/` - Replaced plans
 
-Install the [Mintlify CLI](https://www.npmjs.com/package/mint) to preview your documentation changes locally. To install, use the following command:
+### Progress Tracking
+- `progress/2025-09/` - Weekly progress logs
+
+### Reference Documentation (9-Category System)
+- `reference/01-architecture/` - System design & ADRs
+- `reference/02-apis/` - API documentation (includes legacy i18n docs)
+- `reference/03-development/` - Development practices & setup
+- `reference/04-deployment/` - Operations & infrastructure
+- `reference/05-security/` - Security policies
+- `reference/06-integrations/` - External integrations
+- `reference/07-troubleshooting/` - Support guides
+- `reference/08-performance/` - Performance documentation
+- `reference/09-compliance/` - Regulatory compliance
+
+### Legacy Documentation (Archived)
+- `reference/02-apis/legacy-i18n-en/` - Original English docs
+- `reference/02-apis/legacy-i18n-cn/` - Original Chinese docs
+- `reference/essentials/` - Original essential documentation
+
+## Mintlify Documentation Building
+
+The documentation is built using Mintlify and deployed to https://docs.metamcp.com
+
+### Development
+
+Install the [Mintlify CLI](https://www.npmjs.com/package/mint) to preview your documentation changes locally:
 
 ```
 npm i -g mint
@@ -28,17 +54,8 @@ mint dev
 
 View your local preview at `http://localhost:3000`.
 
-## Publishing changes
+### Publishing changes
 
 Install our GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app) to propagate changes from your repo to your deployment. Changes are deployed to production automatically after pushing to the default branch.
 
-## Need help?
-
-### Troubleshooting
-
-- If your dev environment isn't running: Run `mint update` to ensure you have the most recent version of the CLI.
-- If a page loads as a 404: Make sure you are running in a folder with a valid `docs.json`.
-
-### Resources
-- [Mintlify documentation](https://mintlify.com/docs)
-- [Mintlify community](https://mintlify.com/community)
+For more information about contributing to the documentation, see the [Contributing Guide](../CONTRIBUTING.md).

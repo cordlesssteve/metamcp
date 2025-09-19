@@ -1,0 +1,68 @@
+{
+  "timestamp": "2025-09-19T17:49:16.632Z",
+  "summary": {
+    "total": 11,
+    "passed": 9,
+    "failed": 2,
+    "successRate": 81.8
+  },
+  "tests": [
+    {
+      "name": "TypeScript compilation",
+      "status": "failed",
+      "duration": 5,
+      "error": "Build failed: "
+    },
+    {
+      "name": "RAG client module import",
+      "status": "failed",
+      "duration": 44,
+      "error": "Module import failed: Import failed: Cannot find module './apps/backend/dist/index.js'\nRequire stack:\n- /tmp/test-import.js\n"
+    },
+    {
+      "name": "RAG service health",
+      "status": "passed",
+      "duration": 9
+    },
+    {
+      "name": "RAG service stats",
+      "status": "passed",
+      "duration": 2
+    },
+    {
+      "name": "RAG tool selection basic",
+      "status": "passed",
+      "duration": 19
+    },
+    {
+      "name": "RAG service latency",
+      "status": "passed",
+      "duration": 210
+    },
+    {
+      "name": "Concurrent request handling",
+      "status": "passed",
+      "duration": 96
+    },
+    {
+      "name": "Invalid query handling",
+      "status": "passed",
+      "duration": 17
+    },
+    {
+      "name": "Large tool list handling",
+      "status": "passed",
+      "duration": 16
+    },
+    {
+      "name": "Network timeout simulation",
+      "status": "passed",
+      "duration": 14
+    },
+    {
+      "name": "Tool name format consistency",
+      "status": "passed",
+      "duration": 15
+    }
+  ]
+}

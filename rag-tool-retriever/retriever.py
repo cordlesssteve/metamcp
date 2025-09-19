@@ -12,13 +12,13 @@ from pathlib import Path
 
 # ChromaDB and LangChain imports
 try:
-    from langchain.embeddings import HuggingFaceEmbeddings
-    from langchain.vectorstores import Chroma
+    from langchain_community.embeddings import HuggingFaceEmbeddings
+    from langchain_community.vectorstores import Chroma
     from langchain.tools import Tool
     from langchain.docstore.document import Document
 except ImportError as e:
     raise ImportError(
-        f"Required packages not installed. Run: pip install langchain chromadb sentence-transformers\n"
+        f"Required packages not installed. Run: pip install langchain langchain-community chromadb sentence-transformers\n"
         f"Import error: {e}"
     )
 

@@ -31,6 +31,10 @@ import {
   createFilterListToolsMiddleware,
 } from "./metamcp-middleware/filter-tools.functional";
 import {
+  createRAGListToolsMiddleware,
+  createEnhancedRAGMiddleware,
+} from "./metamcp-middleware/rag-tools.functional";
+import {
   CallToolHandler,
   compose,
   ListToolsHandler,
@@ -352,6 +356,14 @@ export const createServer = async (
 
   // Compose middleware with handlers - this is the Express-like functional approach
   const listToolsWithMiddleware = compose(
+    // RAG middleware for semantic tool selection (applied first to get relevant tools)
+    createRAGListToolsMiddleware({
+      enabled: process.env.RAG_ENABLED !== "false",
+      maxTools: parseInt(process.env.RAG_MAX_TOOLS || "10"),
+      similarityThreshold: parseFloat(process.env.RAG_SIMILARITY_THRESHOLD || "0.0"),
+      fallbackOnError: true,
+    }),
+    // Status-based filtering (applied after RAG to ensure only active tools)
     createFilterListToolsMiddleware({ cacheEnabled: true }),
     // Add more middleware here as needed
     // createLoggingMiddleware(),

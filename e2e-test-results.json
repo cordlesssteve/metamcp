@@ -1,0 +1,15 @@
+{
+  "success": true,
+  "metrics": {
+    "integration": {
+      "totalTools": 54,
+      "selectedTools": 2,
+      "contextReduction": 77.77777777777779,
+      "semanticAccuracy": true
+    },
+    "performance": {
+      "avgLatency": 41.4,
+      "maxLatency": 66
+    }
+  }
+}
