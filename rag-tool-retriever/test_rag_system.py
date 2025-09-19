@@ -367,6 +367,14 @@ class RAGSystemTester:
         persist_dir = os.path.join(self.temp_dir, "test_chroma_db")
         retriever = ToolRetriever(persist_dir, default_k=5)
 
+        # Register the actual tool objects with the retriever
+        from tool_definitions import ToolStandardizer
+        standardizer = ToolStandardizer()
+        test_tools = create_comprehensive_test_tools()  # Get the tools data
+        standardizer.load_from_metamcp_format(test_tools)
+        langchain_tools = standardizer.get_langchain_tools()
+        retriever.register_tools(langchain_tools)
+
         # Test queries with expected tools
         test_queries = [
             {
@@ -474,6 +482,13 @@ class RAGSystemTester:
         # Calculate tokens for RAG-retrieved tools (various query scenarios)
         persist_dir = os.path.join(self.temp_dir, "test_chroma_db")
         retriever = ToolRetriever(persist_dir, default_k=5)
+
+        # Register the actual tool objects with the retriever
+        from tool_definitions import ToolStandardizer
+        standardizer = ToolStandardizer()
+        standardizer.load_from_metamcp_format(test_tools)
+        langchain_tools = standardizer.get_langchain_tools()
+        retriever.register_tools(langchain_tools)
 
         rag_scenarios = [
             "Need to work with files",

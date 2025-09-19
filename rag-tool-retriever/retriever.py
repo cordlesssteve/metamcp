@@ -138,7 +138,7 @@ class ToolRetriever:
         logger.info(f"Set {len(tools)} fallback tools")
 
     def get_relevant_tools(self, query: str, k: Optional[int] = None,
-                          score_threshold: float = 0.0) -> List[Tool]:
+                          score_threshold: float = -500.0) -> List[Tool]:
         """
         Retrieve tools most relevant to the given query
 
@@ -158,17 +158,8 @@ class ToolRetriever:
         try:
             vector_store = self._load_vector_store()
 
-            # Create retriever with specified parameters
-            retriever = vector_store.as_retriever(
-                search_type="similarity_score_threshold",
-                search_kwargs={
-                    "k": k,
-                    "score_threshold": score_threshold
-                }
-            )
-
-            # Retrieve relevant documents
-            relevant_docs = retriever.get_relevant_documents(query)
+            # Use basic similarity search to avoid threshold issues
+            relevant_docs = vector_store.similarity_search(query, k=k)
 
             if not relevant_docs:
                 logger.warning(f"No tools found for query: '{query}'. Using fallback tools.")
