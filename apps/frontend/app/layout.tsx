@@ -2,7 +2,6 @@ import "./globals.css";
 
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { PublicEnvScript } from "next-runtime-env";
 import { Toaster } from "sonner";
 
 import { ThemeProvider } from "../components/providers/theme-provider";
@@ -30,9 +29,6 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html suppressHydrationWarning>
-      <head>
-        <PublicEnvScript />
-      </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ThemeProvider>
           <TRPCProvider>

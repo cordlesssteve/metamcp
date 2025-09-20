@@ -1,9 +1,7 @@
-import { env } from "next-runtime-env";
-
 export const getAppUrl = () => {
   // Check if we're running on the server side
   if (typeof window === "undefined") {
-    // Server-side: try to get from process.env first, then runtime env
+    // Server-side: try to get from process.env
     const serverUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL;
     if (serverUrl) {
       return serverUrl;
@@ -15,8 +13,8 @@ export const getAppUrl = () => {
     );
   }
 
-  // Client-side: use next-runtime-env
-  const NEXT_PUBLIC_APP_URL = env("NEXT_PUBLIC_APP_URL");
+  // Client-side: use Next.js built-in environment variables
+  const NEXT_PUBLIC_APP_URL = process.env.NEXT_PUBLIC_APP_URL;
   if (!NEXT_PUBLIC_APP_URL) {
     // Fallback to current origin on client side
     return window.location.origin;

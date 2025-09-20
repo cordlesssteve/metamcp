@@ -1,5 +1,6 @@
 {
   "name": "metamcp",
+  "type": "module",
   "private": true,
   "scripts": {
     "build": "turbo run build",
@@ -7,6 +8,8 @@
     "dev:docker": "docker compose -f docker-compose.dev.yml up --build",
     "dev:docker:down": "docker compose -f docker-compose.dev.yml down",
     "dev:docker:clean": "docker compose -f docker-compose.dev.yml down -v --remove-orphans",
+    "test:rag": "node test-rag-integration-simple.js",
+    "test:rag-full": "node rag-validation-tests.js",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
