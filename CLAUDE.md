@@ -7,9 +7,26 @@
 
 ## [Fallback] Core Standards
 *If imports above fail, these provide essential behavioral guidelines:*
-- Plan Status Indicators (ACTIVE/ARCHIVED/SUPERSEDED/BLOCKED)
-- Critical Success Verification (compilation, instantiation, integration)
-- Red Flag warnings for documentation conflicts
+
+### Plan Status Indicators - ALWAYS CHECK THESE
+- **ACTIVE**: Currently executing - use this plan
+- **ARCHIVED**: Completed/historical - reference only
+- **SUPERSEDED**: Replaced by newer plan - ignore unless needed for context
+- **BLOCKED**: Waiting for external input - cannot proceed
+
+### When Plans Change
+1. Move old plan to `./docs/plans/archived/`
+2. Update status header to "SUPERSEDED" or "ARCHIVED"
+3. Create new versioned plan with clear "ACTIVE" status
+4. Update CURRENT_STATUS.md with latest reality
+5. Log the change in weekly progress
+
+### Red Flags 🚨
+**STOP and ask for clarification if you see:**
+- Multiple plans marked as "ACTIVE"
+- Conflicting information between CURRENT_STATUS.md and ACTIVE_PLAN.md
+- Plans that haven't been updated in >1 week
+- Missing status headers on planning documents
 
 ## 🚨 MANDATORY READING ORDER 🚨
 Before starting ANY development work, Claude MUST read these files in order:
